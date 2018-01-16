@@ -1,0 +1,66 @@
+version: "3"
+services:
+  db:
+    container_name: driver-api-mongo
+    hostname: driver-api-mongo
+    image: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - "db-data:/data/db"
+      - "db-config:/data/configdb"
+  api:
+    container_name: driver-api
+    hostname: driver-api
+    build: api
+    restart: always
+    ports:
+      - "80:20000"
+    links:
+      - "db:db"
+    environment:
+      - HTTP_PORT=20000
+      - MORPHIA_HOST=db
+      - MORPHIA_PORT=27017
+      - MORPHIA_DATABASE=driver-api
+      - HOSTNAME=driver-api
+
+    volumes:
+      - "data-log:/var/log/driver"
+  worker:
+    container_name: driver-worker
+    hostname: driver-worker
+    build: api
+    restart: always
+    links:
+      - "db:db"
+    environment:
+      - MORPHIA_HOST=db
+      - MORPHIA_PORT=27017
+      - MORPHIA_DATABASE=driver-api
+      - HOSTNAME=driver-worker
+      - WORKER_ONLY=true
+    volumes:
+      - "data-log:/var/log/driver"
+  worker2:
+    container_name: driver-worker2
+    hostname: driver-worker
+    build: api
+    restart: always
+    links:
+      - "db:db"
+    environment:
+      - MORPHIA_HOST=db
+      - MORPHIA_PORT=27017
+      - MORPHIA_DATABASE=driver-api
+      - HOSTNAME=driver-worker
+      - WORKER_ONLY=true
+    volumes:
+      - "data-log:/var/log/driver"
+volumes:
+  data-log:
+    driver: local
+  db-data:
+    driver: local
+  db-config:
+    driver: local
